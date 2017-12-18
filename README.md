@@ -17,15 +17,15 @@ $ python2.7 train.py
 Training log collection => 261548 data entries
 Testing log collection => 3583 data entries
 
-<b>Naive Bayes</b>
+**Naive Bayes**
 Success rate: 98.66%
 
 
-<b>SGD Classifier</b>
+**SGD Classifier**
 Success rate: 76.25%
 
 
-<b>Support Vector Machine</b>
+**Support Vector Machine**
 Success rate: 99.3%
 ```
 
@@ -35,6 +35,22 @@ Success rate: 99.3%
 - takes the following parameters:  
 `--test_data_dir` : sets the location of the testing logs (default: `data/test/laptop`)  
 `--save-dir` : set location where the joblib pickle files are saved to (default: `save`)  
+
+```
+$ python2.7 predict.py 
+Testing log collection => 3583 data entries
+
+**Naive Bayes**
+Success rate: 98.66%
+
+
+**SGD Classifier**
+Success rate: 76.25%
+
+
+**Support Vector Machine**
+Success rate: 99.3%
+```
 
 ## Algorithms
 

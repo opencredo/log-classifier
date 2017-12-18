@@ -56,7 +56,7 @@ def display_results(clf_type,ratio):
 count_vect = CountVectorizer()
 tfidf_transformer = TfidfTransformer()
 
-test_log_collection = create_log_array('data/test/mac')
+test_log_collection = create_log_array(args.test_data_dir)
 
 print("Testing log collection => " + str(len(test_log_collection['data'])) + " data entries")
 print
