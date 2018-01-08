@@ -1,7 +1,7 @@
 #
 # Purpose: Classify logs wrt their source (eg. Java, Apache, Nagios, etc.)
 # Requires: sklearn, numpy, argparse
-# 
+#
 
 import glob
 import timeit
@@ -21,8 +21,8 @@ parser.add_argument('--save_dir', type=str, default='save',
                     help='directory to store training pipeline models')
 args = parser.parse_args()
 
-def classify(clf, new_docs):
-    predicted = clf.predict(new_docs['data'])
+def predict(model, new_docs):
+    predicted = model.predict(new_docs['data'])
     success_ratio = np.mean(predicted == new_docs['type'])
     return success_ratio
 
@@ -48,7 +48,7 @@ def create_log_array(logfile_path):
             log_collection['type'] = temptypes
     return log_collection
 
-def display_results(clf_type,ratio):
+def report(clf_type,ratio):
     print("\033[1m" + clf_type + "\033[0m\033[92m")
     print("Success rate: " + str(round(ratio * 100,2)) + "%\n")
     print
@@ -61,14 +61,7 @@ test_log_collection = create_log_array(args.test_data_dir)
 print("Testing log collection => " + str(len(test_log_collection['data'])) + " data entries")
 print
 
-clf = joblib.load(args.save_dir + "/mnb.pkl")
-success_ratio = classify(clf,test_log_collection)
-display_results("Naive Bayes",success_ratio)
-
-clf = joblib.load(args.save_dir + "/sgd.pkl")
-success_ratio = classify(clf,test_log_collection)
-display_results("SGD Classifier - 5 iterations",success_ratio)
-
-clf = joblib.load(args.save_dir + "/svm.pkl")
-success_ratio = classify(clf,test_log_collection)
-display_results("Support Vector Machine",success_ratio)
+for saved_file in glob.glob(args.save_dir + '/*.pkl'):
+    model = joblib.load(saved_file)
+    success_ratio = predict(model,test_log_collection)
+    report((str(saved_file).split('/')[1].split('.')[0]),success_ratio)
