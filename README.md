@@ -28,6 +28,12 @@ Create data directories.
 mkdir -p data/{train,test}/laptop
 </pre>
 
+Create save directory
+
+<pre>
+mkdir -p save
+</pre>
+
 Collect logs
 
 <pre>
