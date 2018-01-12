@@ -18,7 +18,7 @@ Make sure you have a recent version of python2.7 and python pip, then install th
 
 <pre>
 pip install numpy sklearn
-<pre>
+</pre>
 
 ### Collect logs
 
@@ -26,7 +26,7 @@ Create data directories.
 
 <pre>
 mkdir -p data/{train,test}/laptop
-<pre>
+</pre>
 
 Collect logs
 
@@ -37,7 +37,7 @@ do
   head -$(($rows - ($rows / 10))) "$log" > data/train/laptop/"${log##*/}"
   tail -$(($rows / 10)) "$log" > data/test/laptop/"${log##*/}"
 done
-<pre>
+</pre>
 
 ### Run script
 
@@ -45,7 +45,7 @@ Run the script
 
 <pre>
 python2.7 train.py
-<pre>
+</pre>
 
 This should give something like the following:
 
@@ -143,25 +143,10 @@ Success rate: 99.06%
 <b>RidgeClassifier</b>
 Success rate: 99.16%
 </pre>
-<pre>
-$ python2.7 predict.py 
-Testing log collection => 3583 data entries
-
-<b>Naive Bayes</b>
-Success rate: 98.66%
-
-
-<b>SGD Classifier</b>
-Success rate: 76.25%
-
-
-<b>Support Vector Machine</b>
-Success rate: 99.3%
-</pre>
 
 ## Algorithms
 
-You can adjust the `algorithms` array to include any number of Scikit Learn algorithms that you want to run:
+Adjust the `algorithms` array to include any number of Scikit Learn algorithms that you want to run:
 
 <pre>
 algorithms = [
@@ -180,5 +165,3 @@ algorithms = [
     linear_model.RidgeClassifier(),
 ]
 </pre>
-
-
