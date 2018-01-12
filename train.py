@@ -4,7 +4,6 @@
 #
 
 import glob
-import timeit
 import argparse
 import numpy as np
 from sklearn.pipeline import Pipeline
@@ -21,73 +20,78 @@ parser.add_argument('--train_data_dir', type=str, default='data/train/laptop',
 parser.add_argument('--test_data_dir', type=str, default='data/test/laptop',
                     help='data directory containing training logs')
 parser.add_argument('--save_dir', type=str, default='save',
-                    help='directory to store and load training pipeline models')
+                    help='directory to store and load training models')
 args = parser.parse_args()
 
 def train(algorithm, training_feature_data, training_target_data):
     model = Pipeline([('vect', CountVectorizer()), ('tfidf', TfidfTransformer()), ('clf', algorithm)])
     model.fit(training_feature_data,training_target_data)
-    save_file = str(algorithm).split('(')[0] + '.pkl'
-    joblib.dump(model, args.save_dir + "/" + save_file)
     return model
 
 def predict(model, new_docs):
     predicted = model.predict(new_docs['data'])
-    success_ratio = np.mean(predicted == new_docs['type'])
-    return success_ratio
+    accuracy = np.mean(predicted == new_docs['type'])
+    return accuracy
 
-def create_log_array(logfile_path):
+def create_log_dict(logfile_path):
     log_collection = {}
-    log_types = []
-    logfiles = glob.glob(logfile_path + "/*.log")
+    logfiles = glob.glob(logfile_path + "/*.log") # Get list of log files
     for logfile in logfiles:
-        log_types.append(logfile.split('.')[0].split('/')[-1])
         file_handle = open(logfile, "r")
-        tempdata = file_handle.read().split('\n')
+        filedata_array = file_handle.read().split('\n')
         file_handle.close()
-        for i in tempdata:
-            if len(i) == 0:
-                del tempdata[tempdata.index(i)]
+        # Remove empty lines
+        for line in filedata_array:
+            if len(line) == 0:
+                del filedata_array[filedata_array.index(line)]
+        # Add log file data and type
         if log_collection.has_key('data'):
-            log_collection['data'] = log_collection['data'] + tempdata
-            temptypes = [logfiles.index(logfile)] * len(tempdata)
-            log_collection['type'] = log_collection['type'] + temptypes
+            log_collection['data'] = log_collection['data'] + filedata_array
+            # numerise log type for each line
+            temp_types = [logfiles.index(logfile)] * len(filedata_array)
+            log_collection['type'] = log_collection['type'] + temp_types # Add log type array
+        # Cater for first time iteration
         else:
-            log_collection['data'] = tempdata
-            temptypes = [logfiles.index(logfile)] * len(tempdata)
-            log_collection['type'] = temptypes
+            log_collection['data'] = filedata_array
+            temp_types = [logfiles.index(logfile)] * len(filedata_array)
+            log_collection['type'] = temp_types
+
     return log_collection
 
-def report(clf_type,ratio):
+def report(clf_type,accuracy):
     print("\033[1m" + clf_type + "\033[0m\033[92m")
-    print("Success rate: " + str(round(ratio * 100,2)) + "%\n")
+    print("Success rate: " + str(round(accuracy * 100,2)) + "%\n")
     print
 
+def save_model(algorithm, model):
+    save_file = str(algorithm).split('(')[0] + '.pkl'
+    joblib.dump(model, args.save_dir + "/" + save_file)
+
 algorithms = [
-    svm.SVC(kernel='linear', C = 1.0, verbose=True),   # SLOW
+#    svm.SVC(kernel='linear', C = 1.0),   # QUITE SLOW
     linear_model.SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3, random_state=42, max_iter=5, tol=None),
     naive_bayes.MultinomialNB(),
     naive_bayes.BernoulliNB(),
-    tree.DecisionTreeClassifier(max_depth=5),
+    tree.DecisionTreeClassifier(max_depth=1000),
     tree.ExtraTreeClassifier(),
     ensemble.ExtraTreesClassifier(),
-    neighbors.KNeighborsClassifier(),
-    svm.LinearSVC(multi_class='crammer_singer'),   # SLOW
-    linear_model.LogisticRegressionCV(multi_class='multinomial'),
-    neural_network.MLPClassifier(),   # SLOW
+    svm.LinearSVC(),
+#    linear_model.LogisticRegressionCV(multi_class='multinomial'),   # A BIT SLOW
+#    neural_network.MLPClassifier(),   # VERY SLOW
     neighbors.NearestCentroid(),
     ensemble.RandomForestClassifier(),
     linear_model.RidgeClassifier(),
 ]
 
-log_collection = create_log_array(args.train_data_dir)
-test_log_collection = create_log_array(args.test_data_dir)
+train_log_collection = create_log_dict(args.train_data_dir)
+test_log_collection = create_log_dict(args.test_data_dir)
 
-print("Training log collection => " + str(len(log_collection['data'])) + " data entries")
+print("Training log collection => " + str(len(train_log_collection['data'])) + " data entries")
 print("Testing log collection => " + str(len(test_log_collection['data'])) + " data entries")
 print
 
 for algorithm in algorithms:
-    model = train(algorithm, log_collection['data'], log_collection['type'])
-    success_ratio = predict(model,test_log_collection)
-    report((str(algorithm).split('(')[0]),success_ratio)
+    model = train(algorithm, train_log_collection['data'], train_log_collection['type'])
+    accuracy = predict(model,test_log_collection)
+    report((str(algorithm).split('(')[0]),accuracy)
+    save_model(algorithm, model)
