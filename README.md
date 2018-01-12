@@ -5,7 +5,7 @@
 `train.py`
 
 - trains on a set of training logs using various algorithms
-- saves training models to `joblib` pickle files
+- saves training models as `joblib` pickle files
 - predicts accuracy of the training models
 - takes the following parameters:  
 `--train_data_dir` : sets the location of the training logs (default: `data/train/laptop`)  
