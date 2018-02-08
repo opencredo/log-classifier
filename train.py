@@ -3,6 +3,7 @@
 # Requires: sklearn, numpy, argparse
 #
 
+import os
 import glob
 import argparse
 import numpy as np
@@ -64,6 +65,9 @@ def report(clf_type,accuracy):
     print
 
 def save_model(algorithm, model):
+    # Create directory to save models if it doesn't exist
+    if not os.path.exists(args.save_dir):
+        os.makedirs(args.save_dir)
     save_file = str(algorithm).split('(')[0] + '.pkl'
     joblib.dump(model, args.save_dir + "/" + save_file)
 
